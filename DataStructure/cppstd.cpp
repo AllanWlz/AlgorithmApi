@@ -786,4 +786,154 @@ void List<T>::mergeSort(ListNodePosi(T) &p, int n)
 	merge(p, m, *this, q, n-m);
 }
 
+/*******************************************
+ * @name	BinNode
+ * @brief 	二叉树节点标准模板
+********************************************/
 
+template <typename T> BinNodePosi(T) BinNode<T>::insertAsLC(T const& e)
+{return lc = new BinNode(e,this);}//将e作为当前节点的左孩子插入二叉树
+template <typename T> BinNodePosi(T) BinNode<T>::insertAsRC(T const& e)
+{return rc = new BinNode(e,this);}//将e作为当前节点的左孩子插入二叉树
+
+template <typename T, typename VST>
+static void visitAlongLeftBranch(BinNodePosi(T) x, VST& visit, Stack<BinNodePosi(T)> & S)
+{
+	while(x)
+	{
+		visit(x->data);
+		if(x -> rc != NULL) S.push(x->rc); 
+		x = x->lc;
+	}
+}
+template <typename T> template <typename VST>
+void BinNode<T>::travPre(VST& visit)	//先序遍历
+{
+	Stack<BinNodePosi(T)> S;
+	BinNodePosi(T) x = this;
+	while(true)
+	{
+		visitAlongLeftBranch(x, visit, S);
+		if(S.empty()) break;
+		x = S.pop();
+	}
+}
+
+template <typename T, typename VST>
+static void goAlongLeftBranch(BinNodePosi(T) x, VST& visit, Stack<BinNodePosi(T)> & S)
+{
+	while(x)
+	{
+		S.push(x);
+		x = x->lc;
+	}
+}
+template <typename T> template <typename VST>
+void BinNode<T>::travIn(VST& visit)	//先序遍历
+{
+	Stack<BinNodePosi(T)> S;
+	BinNodePosi(T) x = this;
+	while(true)
+	{
+		goAlongLeftBranch(x, visit, S);
+		if(S.empty()) break;
+		x = S.pop();
+		visit(x->data);
+		x=x->rc;
+	}
+}
+
+template <typename T> template <typename VST>
+void BinNode<T>::travLevel(VST& visit)	//先序遍历
+{
+	Queue<BinNodePosi(T)> Q;
+	Q.enqueue(this);
+	while(!Q.empty())
+	{
+		BinNodePosi(T) x=Q.dequeue();
+		visit(x->data);
+		if(HasLChild(*x)) Q.enqueue(x->lc);
+		if(HasRChild(*x)) Q.enqueue(x->rc);
+	}
+}
+
+/*******************************************
+ * @name	BinTree
+ * @brief 	二叉树标准模板
+********************************************/
+//树的高度更新
+template <typename T> int BinTree<T>::updateHeight(BinNodePosi(T) x)
+{return x->height = 1 + max(stature(x->lc), stature(x->rc));}
+template <typename T> void BinTree<T>::updateHeightAbove(BinNodePosi(T) x)
+{
+	while(x) {updateHeight(x); x=x->parent;}
+}
+
+template <typename T>
+BinNodePosi(T) BinTree<T>::insertAsRoot(T const& e)
+{_size = 1; return _root = new BinNode<T>(e);} //将e当作根节点插入空的二叉树
+
+template <typename T>
+BinNodePosi(T) BinTree<T>::insertAsLC(BinNodePosi(T) x, T const& e)
+{_size++; x->insertAsLC(e); updateHeightAbove(x); return x->lc;} 
+
+template <typename T>
+BinNodePosi(T) BinTree<T>::insertAsRC(BinNodePosi(T) x, T const& e)
+{_size++; x->insertAsRC(e); updateHeightAbove(x); return x->lc;} 
+
+template <typename T>	//将S当作节点x的左子树接入，S本身置空
+BinNodePosi(T) BinTree<T>::attachAsLC(BinNodePosi(T) x, BinTree<T> * &S)	//T作为x左子树接入
+{
+	if(x->lc = S->_root) x->lc->parent = x;
+	_size += S._size; updateHeightAbove(x);
+	S->_root = NULL;
+	S->_size = 0;
+	release(S);
+	S = NULL;
+	return x;
+}
+
+template <typename T>	//将S当作节点x的右子树接入，S本身置空
+BinNodePosi(T) BinTree<T>::attachAsRC(BinNodePosi(T) x, BinTree<T> * &S)	//T作为x左子树接入
+{
+	if(x->rc = S->_root) x->rc->parent = x;
+	_size += S._size; updateHeightAbove(x);
+	S->_root = NULL;
+	S->_size = 0;
+	release(S);
+	S = NULL;
+	return x;
+}
+
+template <typename T>	//删除二叉树中位置x处的节点及其后代，返回被删除节点的数量
+int BinTree<T>::remove(BinNodePosi(T) x)
+{
+	FromParentTo(*x) = NULL;
+	updateHeightAbove(x -> parent);
+	int n = removeAt(x);
+	_size -= n;
+	return n;
+}
+
+template <typename T>	//删除二叉树中位置x处的节点及其后代，返回被删除节点的数量
+static int removeAt(BinNodePosi(T) x)
+{
+	if(!x) return 0;
+	int n = 1 + removeAt(x -> lc) + removeAt(x->rc);
+	release(x->data);
+	release(x);
+	return n;
+}
+
+template <typename T>
+BinTree<T>* BinTree<T>::secede(BinNodePosi(T) x)
+{
+	FromParentTo(*x) = NULL;
+	updateHeightAbove(x->parent);
+	BinTree<T> * S = new BinTree<T>;
+	S->_root = x;
+	x->parent =NULL;
+	S->_size = x->size();
+	_size -= S->_size;
+	return S;
+}
