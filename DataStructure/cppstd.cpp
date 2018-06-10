@@ -302,12 +302,12 @@ bool Vector<T>::bubble(Rank lo, Rank hi){
 	while(++lo < hi)
 	{
 
-		if( _elem[lo - 1] > _elem[hi])
+		if( _elem[lo - 1] > _elem[lo])
 		{
 
 			sorted = false;
 
-			swap(_elem[lo - 1], _elem[hi]);
+			swap(_elem[lo - 1], _elem[lo]);
 
 		}
 
