@@ -862,6 +862,7 @@ void BinNode<T>::travLevel(VST& visit)	//先序遍历
  * @brief 	二叉树标准模板
 ********************************************/
 //树的高度更新
+#define max(a,b) (((a) > (b)) ? (a) : (b))  
 template <typename T> int BinTree<T>::updateHeight(BinNodePosi(T) x)
 {return x->height = 1 + max(stature(x->lc), stature(x->rc));}
 template <typename T> void BinTree<T>::updateHeightAbove(BinNodePosi(T) x)
